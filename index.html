@@ -1,206 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leadership Quiz</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        .container {
-            width: 90%;
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #4CAF50;
-        }
-        .question {
-            display: none;
-        }
-        .active-question {
-            display: block;
-        }
-        .answer-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        button {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .next-button {
-            display: none;
-            background-color: #2196F3;
-        }
-        .next-button:hover {
-            background-color: #0b7dda;
-        }
-        .result {
-            display: none;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .email-section {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .email-section input {
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-            width: 80%;
-            max-width: 300px;
-        }
-        /* Mobile-friendly */
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-            h1 {
-                font-size: 24px;
-            }
-            button {
-                font-size: 14px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leadership Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+    }
+
+    .question {
+      display: none;
+    }
+
+    .active-question {
+      display: block;
+    }
+
+    .answer-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .next-button {
+      display: none;
+      background-color: #2196F3;
+    }
+
+    .next-button:hover {
+      background-color: #0b7dda;
+    }
+
+    .result {
+      display: none;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .email-section {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .email-section input {
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      width: 80%;
+      max-width: 300px;
+    }
+
+    /* Mobile-friendly */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Leadership Quiz</h1>
+  <div class="container">
+    <h1>Leadership Quiz</h1>
 
-        <!-- Question 1 -->
-        <div id="question1" class="question active-question">
-            <p>1. What motivates you most?</p>
-            <div class="answer-buttons">
-                <button onclick="nextQuestion('q1a')">A) Achieving personal goals</button>
-                <button onclick="nextQuestion('q1b')">B) Helping others achieve their goals</button>
-                <button onclick="nextQuestion('q1c')">C) Solving complex challenges</button>
-            </div>
-        </div>
-
-        <!-- Other questions here... -->
-
-        <!-- Result Section -->
-        <div id="result" class="result">
-            <p>Your leadership style is:</p>
-            <p id="leadership-result"></p>
-        </div>
-
-        <!-- Email Section -->
-        <div id="email-section" class="email-section">
-            <p>Enter your email to receive your certificate:</p>
-            <input type="email" id="user-email" placeholder="Your email address" required>
-            <button onclick="downloadCertificate()">Download Certificate</button>
-        </div>
-
-        <!-- Next Button -->
-        <div class="next-button" id="nextButton">
-            <button onclick="showResult()">See Your Leadership Style</button>
-        </div>
+    <!-- Question 1 -->
+    <div id="question1" class="question active-question">
+      <p>1. What motivates you most?</p>
+      <div class="answer-buttons">
+        <button onclick="nextQuestion('q1a')">A) Achieving personal goals</button>
+        <button onclick="nextQuestion('q1b')">B) Helping others achieve their goals</button>
+        <button onclick="nextQuestion('q1c')">C) Solving complex challenges</button>
+      </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        let currentQuestionIndex = 0;
-        const questions = document.querySelectorAll('.question');
-        const resultElement = document.getElementById('result');
-        const nextButton = document.getElementById('nextButton');
-        const leadershipResult = document.getElementById('leadership-result');
-        const emailSection = document.getElementById('email-section');
-        let answers = [];
+    <!-- Question 2 -->
+    <div id="question2" class="question">
+      <p>2. How do you make decisions?</p>
+      <div class="answer-buttons">
+        <button onclick="nextQuestion('q2a')">A) I make decisions quickly based on gut feeling</button>
+        <button onclick="nextQuestion('q2b')">B) I gather input from others before deciding</button>
+        <button onclick="nextQuestion('q2c')">C) I analyze the data before making any decision</button>
+      </div>
+    </div>
 
-        function nextQuestion(answer) {
-            answers.push(answer);
+    <!-- Question 3 -->
+    <div id="question3" class="question">
+      <p>3. How do you typically lead a team?</p>
+      <div class="answer-buttons">
+        <button onclick="nextQuestion('q3a')">A) By inspiring and motivating them</button>
+        <button onclick="nextQuestion('q3b')">B) By setting clear goals and expectations</button>
+        <button onclick="nextQuestion('q3c')">C) By collaborating and allowing input from everyone</button>
+      </div>
+    </div>
 
-            // Show the next question
-            questions[currentQuestionIndex].classList.remove('active-question');
-            currentQuestionIndex++;
+    <!-- Question 4 -->
+    <div id="question4" class="question">
+      <p>4. When faced with a problem, how do you react?</p>
+      <div class="answer-buttons">
+        <button onclick="nextQuestion('q4a')">A) I act quickly to resolve it</button>
+        <button onclick="nextQuestion('q4b')">B) I seek advice from others before deciding</button>
+        <button onclick="nextQuestion('q4c')">C) I analyze all possibilities and consider the long-term effects</button>
+      </div>
+    </div>
 
-            if (currentQuestionIndex < questions.length) {
-                questions[currentQuestionIndex].classList.add('active-question');
-            } else {
-                // When the last question is answered, show the result and email section
-                nextButton.style.display = 'block';
-                emailSection.style.display = 'block';
-            }
-        }
+    <!-- Question 5 -->
+    <div id="question5" class="question">
+      <p>5. What type of environment do you thrive in?</p>
+      <div class="answer-buttons">
+        <button onclick="nextQuestion('q5a')">A) A fast-paced, goal-oriented environment</button>
+        <button onclick="nextQuestion('q5b')">B) A supportive and collaborative environment</button>
+        <button onclick="nextQuestion('q5c')">C) A creative and flexible environment</button>
+      </div>
+    </div>
 
-        function showResult() {
-            // Leadership style logic
-            if (answers.includes('q1a') || answers.includes('q3a') || answers.includes('q5a')) {
-                leadershipResult.innerText = 'Visionary Leader';
-            } else if (answers.includes('q1b') || answers.includes('q2b') || answers.includes('q4b')) {
-                leadershipResult.innerText = 'Supportive Leader';
-            } else {
-                leadershipResult.innerText = 'Strategic Leader';
-            }
+    <!-- Result Section -->
+    <div id="result" class="result">
+      <p>Your leadership style is:</p>
+      <p id="leadership-result"></p>
+    </div>
 
-            resultElement.style.display = 'block';
-            nextButton.style.display = 'none'; // Hide next button after showing result
-        }
+    <!-- Email + Certificate -->
+    <div id="email-section" class="email-section">
+      <p>Enter your email to receive your certificate:</p>
+      <input type="email" id="user-email" placeholder="Your email address" required />
+      <button onclick="downloadCertificate()">Download Certificate</button>
+    </div>
 
-        function downloadCertificate() {
-            const email = document.getElementById('user-email').value;
-            if (!email) {
-                alert('Please enter a valid email!');
-                return;
-            }
+    <!-- Next Button -->
+    <div class="next-button" id="nextButton">
+      <button onclick="showResult()">See Your Leadership Style</button>
+    </div>
+  </div>
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+  <!-- jsPDF Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-            // Add UC logo (replace with actual image URL if you have one)
-            const logo = 'https://upload.wikimedia.org/wikipedia/commons/5/5e/University_of_Canberra_logo.png';
-            doc.addImage(logo, 'PNG', 10, 10, 40, 20); // Adjust as needed
+  <script>
+    let currentQuestionIndex = 0;
+    const questions = document.querySelectorAll(".question");
+    const resultElement = document.getElementById("result");
+    const nextButton = document.getElementById("nextButton");
+    const leadershipResult = document.getElementById("leadership-result");
+    const emailSection = document.getElementById("email-section");
+    let answers = [];
 
-            // Title
-            doc.setFontSize(18);
-            doc.text('University of Canberra', 60, 20);
-            doc.setFontSize(14);
-            doc.text('Leadership Style Certificate', 60, 30);
+    function nextQuestion(answer) {
+      answers.push(answer);
+      questions[currentQuestionIndex].classList.remove("active-question");
+      currentQuestionIndex++;
 
-            // Add leadership style
-            doc.setFontSize(12);
-            doc.text(`Your Leadership Style: ${leadershipResult.innerText}`, 20, 50);
+      if (currentQuestionIndex < questions.length) {
+        questions[currentQuestionIndex].classList.add("active-question");
+      } else {
+        nextButton.style.display = "block";
+      }
+    }
 
-            // Add date
-            const date = new Date();
-            const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-            doc.text(`Date: ${formattedDate}`, 20, 60);
+    function showResult() {
+      // Simple scoring logic
+      if (answers.includes("q1a") || answers.includes("q3a") || answers.includes("q5a")) {
+        leadershipResult.innerText = "Visionary Leader";
+      } else if (answers.includes("q1b") || answers.includes("q2b") || answers.includes("q4b")) {
+        leadershipResult.innerText = "Supportive Leader";
+      } else {
+        leadershipResult.innerText = "Strategic Leader";
+      }
 
-            // Save the PDF
-            doc.save(`Leadership_Certificate_${email}.pdf`);
+      resultElement.style.display = "block";
+      nextButton.style.display = "none";
+      emailSection.style.display = "block";
+    }
 
-            // Optionally, send the certificate via email (to be done server-side)
-            // For simplicity, we won't implement the server-side email feature here.
+    async function downloadCertificate() {
+      const email = document.getElementById("user-email").value;
+      if (!email || !email.includes("@")) {
+        alert("Please enter a valid email.");
+        return;
+      }
 
-            alert('Certificate downloaded! Check your email soon.');
-        }
-    </script>
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Add UC logo (replace with official logo image URL if needed)
+      const logoUrl = "https://upload.wikimedia.org/wikipedia/commons/5/5e/University_of_Canberra_logo.png";
+
+      const img = new Image();
+      img.src = logoUrl;
+
+      img.onload = function () {
+        doc.addImage(img, "PNG", 10, 10, 40, 20);
+        doc.setFontSize(16);
+        doc.text("University of Canberra", 60, 20);
+        doc.setFontSize(14);
+        doc.text("Leadership Style Certificate", 60, 30);
+        doc.setFontSize(12);
+        doc.text(`Awarded to: ${email}`, 20, 50);
+        doc.text(`Leadership Style: ${leadershipResult.innerText}`, 20, 60);
+
+        const today = new Date();
+        const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+        doc.text(`Date: ${dateStr}`, 20, 70);
+
+        doc.save(`UC_Leadership_Certificate.pdf`);
+        alert("Your certificate has been downloaded!");
+      };
+
+      img.onerror = function () {
+        alert("Could not load UC logo. Try again later.");
+      };
+    }
+  </script>
 </body>
 </html>
