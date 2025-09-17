@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>What Kind of Leader Are You?</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    h1 { text-align: center; }
+    .question { margin-bottom: 20px; }
+    .result { margin-top: 30px; padding: 20px; border: 2px solid #ccc; background-color: #f9f9f9; }
+    .submit-btn { padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<h1>🧭 What Kind of Leader Are You?</h1>
+<p>Answer these 5 quick questions to discover your leadership style.</p>
+
+<form id="quizForm">
+  <div class="question">
+    <strong>1. You're working on a group project and the deadline is tight. How do you respond?</strong><br>
+    <label><input type="radio" name="q1" value="A"> Jump in and assign roles</label><br>
+    <label><input type="radio" name="q1" value="B"> Ask for everyone's input</label><br>
+    <label><input type="radio" name="q1" value="C"> Support the stressed team members</label><br>
+    <label><input type="radio" name="q1" value="D"> Motivate the team with the vision</label>
+  </div>
+
+  <div class="question">
+    <strong>2. A team member is not doing their share. What do you do?</strong><br>
+    <label><input type="radio" name="q2" value="A"> Address it directly and quickly</label><br>
+    <label><input type="radio" name="q2" value="B"> Talk to them privately</label><br>
+    <label><input type="radio" name="q2" value="C"> Quietly help them out</label><br>
+    <label><input type="radio" name="q2" value="D"> Rally the team to support them</label>
+  </div>
+
+  <div class="question">
+    <strong>3. Which of these best describes you?</strong><br>
+    <label><input type="radio" name="q3" value="A"> Assertive</label><br>
+    <label><input type="radio" name="q3" value="B"> Empathetic</label><br>
+    <label><input type="radio" name="q3" value="C"> Supportive</label><br>
+    <label><input type="radio" name="q3" value="D"> Inspiring</label>
+  </div>
+
+  <div class="question">
+    <strong>4. What’s most important to you as a leader?</strong><br>
+    <label><input type="radio" name="q4" value="A"> Getting things done</label><br>
+    <label><input type="radio" name="q4" value="B"> Listening to others</label><br>
+    <label><input type="radio" name="q4" value="C"> Keeping the peace</label><br>
+    <label><input type="radio" name="q4" value="D"> Inspiring others</label>
+  </div>
+
+  <div class="question">
+    <strong>5. If your team succeeds, why would that be?</strong><br>
+    <label><input type="radio" name="q5" value="A"> Because you took charge</label><br>
+    <label><input type="radio" name="q5" value="B"> Because everyone felt heard</label><br>
+    <label><input type="radio" name="q5" value="C"> Because people felt supported</label><br>
+    <label><input type="radio" name="q5" value="D"> Because you had a shared vision</label>
+  </div>
+
+  <button type="submit" class="submit-btn">See My Leadership Style</button>
+</form>
+
+<div class="result" id="result" style="display:none;"></div>
+
+<script>
+document.getElementById("quizForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  
+  let answers = ["q1", "q2", "q3", "q4", "q5"];
+  let counts = { A: 0, B: 0, C: 0, D: 0 };
+
+  for (let q of answers) {
+    let val = document.querySelector(`input[name="${q}"]:checked`);
+    if (!val) {
+      alert("Please answer all questions.");
+      return;
+    }
+    counts[val.value]++;
+  }
+
+  let topAnswer = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+
+  let resultText = "";
+
+  if (topAnswer === "A") {
+    resultText = `<h2>🔴 You are The Driver – Directive Leader</h2>
+    <p>You take charge, act fast, and keep the team focused. People look to you for direction in high-pressure situations.</p>
+    <p><strong>Famous Example:</strong> Serena Williams</p>
+    <p><strong>Learn more:</strong> Explore leadership programs at the University of Canberra!</p>`;
+  } else if (topAnswer === "B") {
+    resultText = `<h2>🔵 You are The Listener – Democratic Leader</h2>
+    <p>You create inclusive environments where everyone has a say. You believe leadership is shared.</p>
+    <p><strong>Famous Example:</strong> Jacinda Ardern</p>
+    <p><strong>Learn more:</strong> Explore leadership programs at the University of Canberra!</p>`;
+  } else if (topAnswer === "C") {
+    resultText = `<h2>🟢 You are The Supporter – Servant Leader</h2>
+    <p>You lead by helping others succeed. Your calm and supportive nature earns deep trust.</p>
+    <p><strong>Famous Example:</strong> Mr. Rogers</p>
+    <p><strong>Learn more:</strong> Explore leadership and wellbeing pathways at UC Canberra.</p>`;
+  } else {
+    resultText = `<h2>🟡 You are The Visionary – Transformational Leader</h2>
+    <p>You inspire with your passion and big-picture thinking. You motivate others to reach new heights.</p>
+    <p><strong>Famous Example:</strong> Elon Musk</p>
+    <p><strong>Learn more:</strong> Check out innovation and entrepreneurship programs at UC Canberra.</p>`;
+  }
+
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result").innerHTML = resultText;
+});
+</script>
+
+</body>
+</html>
