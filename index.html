@@ -5,254 +5,431 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leadership Quiz</title>
   <style>
+    :root {
+      --brand: #4CAF50;
+      --brand-2: #2196F3;
+      --bg: #f4f4f4;
+      --text: #333;
+      --card: #fff;
+      --muted: #666;
+    }
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-      color: #333;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
     }
-
     .container {
-      width: 90%;
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 92%;
+      max-width: 720px;
+      margin: 24px auto 40px;
+      padding: 24px;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
-
     h1 {
+      margin: 0 0 8px;
       text-align: center;
-      color: #4CAF50;
+      color: var(--brand);
+      letter-spacing: 0.3px;
     }
+    .sub { text-align: center; color: var(--muted); margin: 0 0 16px; font-size: 14px; }
 
-    .question {
-      display: none;
+    /* Progress */
+    .progress {
+      display: flex; align-items: center; gap: 12px;
+      margin: 10px 0 18px;
     }
+    .progress meter {
+      width: 100%; height: 10px;
+    }
+    .screen { display: none; }
+    .screen.active { display: block; }
 
-    .active-question {
-      display: block;
-    }
+    fieldset { border: 0; padding: 0; margin: 0; }
+    legend { font-weight: 600; margin-bottom: 10px; }
 
-    .answer-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .options { display: grid; gap: 10px; margin: 8px 0 4px; }
+    .option {
+      display: flex; align-items: center; gap: 10px; padding: 12px;
+      border: 1px solid #e8e8e8; border-radius: 10px; cursor: pointer;
     }
+    .option input { accent-color: var(--brand); }
+    .muted { color: var(--muted); font-size: 14px; }
 
-    button {
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s;
+    .actions { display: flex; gap: 10px; justify-content: space-between; margin-top: 16px; }
+    .btn {
+      appearance: none; border: 0; border-radius: 10px; padding: 12px 16px; cursor: pointer; font-weight: 600;
+      background: var(--brand); color: #fff; transition: transform .03s ease-in-out, box-shadow .2s;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.06);
     }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    .next-button {
-      display: none;
-      background-color: #2196F3;
-    }
-
-    .next-button:hover {
-      background-color: #0b7dda;
-    }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary { background: var(--brand-2); }
+    .btn.ghost { background: #eef6ff; color: #07428a; }
 
     .result {
-      display: none;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
+      text-align: center; padding: 8px 0 0;
+    }
+    .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #eef6ff; color: #07428a; font-weight: 700; }
+    .result-card {
+      margin: 12px auto; padding: 16px; border: 1px solid #eef0f2; border-radius: 12px; max-width: 520px; text-align: left;
     }
 
-    .email-section {
-      display: none;
-      text-align: center;
-      margin-top: 20px;
+    .email-section { margin-top: 18px; text-align: center; }
+    .grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
+    input[type="text"], input[type="email"] {
+      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e4e6ea; font-size: 16px;
     }
 
-    .email-section input {
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
-      width: 80%;
-      max-width: 300px;
-    }
-
-    /* Mobile-friendly */
-    @media (max-width: 600px) {
-      .container {
-        padding: 10px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      button {
-        font-size: 14px;
-      }
+    @media (min-width: 560px) {
+      .grid.two { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="app">
     <h1>Leadership Quiz</h1>
+    <p class="sub" id="aria-status" aria-live="polite">Answer the questions to discover your dominant leadership style.</p>
 
-    <!-- Question 1 -->
-    <div id="question1" class="question active-question">
-      <p>1. What motivates you most?</p>
-      <div class="answer-buttons">
-        <button onclick="nextQuestion('q1a')">A) Achieving personal goals</button>
-        <button onclick="nextQuestion('q1b')">B) Helping others achieve their goals</button>
-        <button onclick="nextQuestion('q1c')">C) Solving complex challenges</button>
+    <div class="progress" aria-hidden="false">
+      <meter id="progress" min="0" max="5" value="1"></meter>
+      <div class="muted"><span id="progress-text">1</span>/5</div>
+    </div>
+
+    <!-- QUESTION SCREENS -->
+    <form id="quiz" novalidate>
+      <section class="screen active" data-index="0">
+        <fieldset>
+          <legend id="q1-legend" tabindex="-1">1. What motivates you most?</legend>
+          <div role="group" aria-labelledby="q1-legend" class="options">
+            <label class="option"><input type="radio" name="q1" value="A"/> A) Achieving personal goals</label>
+            <label class="option"><input type="radio" name="q1" value="B"/> B) Helping others achieve their goals</label>
+            <label class="option"><input type="radio" name="q1" value="C"/> C) Solving complex challenges</label>
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="button" class="btn ghost" data-prev disabled>Back</button>
+          <button type="button" class="btn" data-next disabled>Next</button>
+        </div>
+      </section>
+
+      <section class="screen" data-index="1">
+        <fieldset>
+          <legend id="q2-legend" tabindex="-1">2. How do you make decisions?</legend>
+          <div role="group" aria-labelledby="q2-legend" class="options">
+            <label class="option"><input type="radio" name="q2" value="A"/> A) Quickly based on gut</label>
+            <label class="option"><input type="radio" name="q2" value="B"/> B) Gather input before deciding</label>
+            <label class="option"><input type="radio" name="q2" value="C"/> C) Analyse data first</label>
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="button" class="btn ghost" data-prev>Back</button>
+          <button type="button" class="btn" data-next disabled>Next</button>
+        </div>
+      </section>
+
+      <section class="screen" data-index="2">
+        <fieldset>
+          <legend id="q3-legend" tabindex="-1">3. How do you typically lead a team?</legend>
+          <div role="group" aria-labelledby="q3-legend" class="options">
+            <label class="option"><input type="radio" name="q3" value="A"/> A) By inspiring and motivating</label>
+            <label class="option"><input type="radio" name="q3" value="B"/> B) By setting clear goals & expectations</label>
+            <label class="option"><input type="radio" name="q3" value="C"/> C) By collaborating and seeking input</label>
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="button" class="btn ghost" data-prev>Back</button>
+          <button type="button" class="btn" data-next disabled>Next</button>
+        </div>
+      </section>
+
+      <section class="screen" data-index="3">
+        <fieldset>
+          <legend id="q4-legend" tabindex="-1">4. When faced with a problem, how do you react?</legend>
+          <div role="group" aria-labelledby="q4-legend" class="options">
+            <label class="option"><input type="radio" name="q4" value="A"/> A) Act quickly to resolve it</label>
+            <label class="option"><input type="radio" name="q4" value="B"/> B) Seek advice before deciding</label>
+            <label class="option"><input type="radio" name="q4" value="C"/> C) Analyse options & longer-term effects</label>
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="button" class="btn ghost" data-prev>Back</button>
+          <button type="button" class="btn" data-next disabled>Next</button>
+        </div>
+      </section>
+
+      <section class="screen" data-index="4">
+        <fieldset>
+          <legend id="q5-legend" tabindex="-1">5. What environment do you thrive in?</legend>
+          <div role="group" aria-labelledby="q5-legend" class="options">
+            <label class="option"><input type="radio" name="q5" value="A"/> A) Fast‑paced, goal‑oriented</label>
+            <label class="option"><input type="radio" name="q5" value="B"/> B) Supportive & collaborative</label>
+            <label class="option"><input type="radio" name="q5" value="C"/> C) Creative & flexible</label>
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="button" class="btn ghost" data-prev>Back</button>
+          <button type="submit" class="btn secondary" id="see-result" disabled>See your leadership style</button>
+        </div>
+      </section>
+    </form>
+
+    <!-- RESULT SCREEN -->
+    <section id="result" class="screen" aria-live="polite">
+      <div class="result">
+        <div class="badge" id="style-badge">Leadership Style</div>
+        <div class="result-card">
+          <h2 id="style-title" style="margin:0 0 6px">&nbsp;</h2>
+          <p id="style-desc" class="muted" style="margin:0"></p>
+        </div>
       </div>
-    </div>
 
-    <!-- Question 2 -->
-    <div id="question2" class="question">
-      <p>2. How do you make decisions?</p>
-      <div class="answer-buttons">
-        <button onclick="nextQuestion('q2a')">A) I make decisions quickly based on gut feeling</button>
-        <button onclick="nextQuestion('q2b')">B) I gather input from others before deciding</button>
-        <button onclick="nextQuestion('q2c')">C) I analyze the data before making any decision</button>
+      <div class="email-section">
+        <div class="grid two">
+          <div>
+            <label class="muted" for="full-name">Full name (optional)</label>
+            <input id="full-name" type="text" placeholder="Your name" autocomplete="name" />
+          </div>
+          <div>
+            <label class="muted" for="user-email">Email (for certificate)</label>
+            <input id="user-email" type="email" placeholder="name@example.com" required />
+          </div>
+        </div>
+        <div class="actions" style="justify-content:center;margin-top:14px">
+          <button class="btn secondary" id="download-cert">Download certificate</button>
+          <button class="btn ghost" id="restart">Restart</button>
+        </div>
+        <p class="muted" style="margin-top:8px">Your details are used only to render the PDF in your browser and are not sent anywhere.</p>
       </div>
-    </div>
-
-    <!-- Question 3 -->
-    <div id="question3" class="question">
-      <p>3. How do you typically lead a team?</p>
-      <div class="answer-buttons">
-        <button onclick="nextQuestion('q3a')">A) By inspiring and motivating them</button>
-        <button onclick="nextQuestion('q3b')">B) By setting clear goals and expectations</button>
-        <button onclick="nextQuestion('q3c')">C) By collaborating and allowing input from everyone</button>
-      </div>
-    </div>
-
-    <!-- Question 4 -->
-    <div id="question4" class="question">
-      <p>4. When faced with a problem, how do you react?</p>
-      <div class="answer-buttons">
-        <button onclick="nextQuestion('q4a')">A) I act quickly to resolve it</button>
-        <button onclick="nextQuestion('q4b')">B) I seek advice from others before deciding</button>
-        <button onclick="nextQuestion('q4c')">C) I analyze all possibilities and consider the long-term effects</button>
-      </div>
-    </div>
-
-    <!-- Question 5 -->
-    <div id="question5" class="question">
-      <p>5. What type of environment do you thrive in?</p>
-      <div class="answer-buttons">
-        <button onclick="nextQuestion('q5a')">A) A fast-paced, goal-oriented environment</button>
-        <button onclick="nextQuestion('q5b')">B) A supportive and collaborative environment</button>
-        <button onclick="nextQuestion('q5c')">C) A creative and flexible environment</button>
-      </div>
-    </div>
-
-    <!-- Result Section -->
-    <div id="result" class="result">
-      <p>Your leadership style is:</p>
-      <p id="leadership-result"></p>
-    </div>
-
-    <!-- Email + Certificate -->
-    <div id="email-section" class="email-section">
-      <p>Enter your email to receive your certificate:</p>
-      <input type="email" id="user-email" placeholder="Your email address" required />
-      <button onclick="downloadCertificate()">Download Certificate</button>
-    </div>
-
-    <!-- Next Button -->
-    <div class="next-button" id="nextButton">
-      <button onclick="showResult()">See Your Leadership Style</button>
-    </div>
+    </section>
   </div>
 
-  <!-- jsPDF Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-YkG3ykrjR5wq8xwq5RHeu8Gk8r3x5v2t9vH9iJ4GoQmPjF3mV5mOo6KkJm9qXk8IQ0Mlz6e3n9kP2oH7c5p3YQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <script>
-    let currentQuestionIndex = 0;
-    const questions = document.querySelectorAll(".question");
-    const resultElement = document.getElementById("result");
-    const nextButton = document.getElementById("nextButton");
-    const leadershipResult = document.getElementById("leadership-result");
-    const emailSection = document.getElementById("email-section");
-    let answers = [];
+    // ----- Data model -----
+    const QUESTIONS = [
+      { name: 'q1', legend: '1. What motivates you most?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
+      { name: 'q2', legend: '2. How do you make decisions?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
+      { name: 'q3', legend: '3. How do you typically lead a team?', map: { A: 'Visionary', B: 'Strategic', C: 'Supportive' } },
+      { name: 'q4', legend: '4. When faced with a problem, how do you react?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
+      { name: 'q5', legend: '5. What environment do you thrive in?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
+    ];
 
-    function nextQuestion(answer) {
-      answers.push(answer);
-      questions[currentQuestionIndex].classList.remove("active-question");
-      currentQuestionIndex++;
+    const STYLE_DESCRIPTIONS = {
+      Visionary: 'You lead with energy and direction, setting bold goals and rallying others around a compelling future.',
+      Supportive: 'You prioritise people, build trust, and create environments where teams feel safe to contribute and grow.',
+      Strategic: 'You think in systems, analyse trade‑offs, and make thoughtful decisions for long‑term outcomes.'
+    };
 
-      if (currentQuestionIndex < questions.length) {
-        questions[currentQuestionIndex].classList.add("active-question");
-      } else {
-        nextButton.style.display = "block";
-      }
+    // ----- State -----
+    let current = 0; // screen index in [0..4]
+
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+    const screens = $$('#quiz .screen');
+    const progress = $('#progress');
+    const progressText = $('#progress-text');
+    const ariaStatus = $('#aria-status');
+
+    // Enable next buttons when an option is picked, and the submit button on last screen
+    $$('#quiz input[type="radio"]').forEach(input => {
+      input.addEventListener('change', () => {
+        const section = input.closest('.screen');
+        const nextBtn = section.querySelector('[data-next]') || $('#see-result');
+        if (nextBtn) nextBtn.disabled = false;
+      });
+    });
+
+    // Navigation handlers
+    $$('#quiz [data-next]').forEach(btn => btn.addEventListener('click', () => goto(current + 1)));
+    $$('#quiz [data-prev]').forEach(btn => btn.addEventListener('click', () => goto(current - 1)));
+
+    $('#quiz').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!allAnswered()) { alert('Please answer all questions.'); return; }
+      const tally = score();
+      const result = pickStyle(tally);
+      showResult(result, tally);
+    });
+
+    function goto(index) {
+      if (index < 0 || index > 4) return;
+      screens[current].classList.remove('active');
+      current = index;
+      screens[current].classList.add('active');
+      progress.value = current + 1;
+      progressText.textContent = String(current + 1);
+      const legend = screens[current].querySelector('legend');
+      if (legend) legend.focus();
+      ariaStatus.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+      // Disable Next if no selection yet
+      const hasChoice = screens[current].querySelector('input[type="radio"]:checked');
+      const nextBtn = screens[current].querySelector('[data-next]') || $('#see-result');
+      if (nextBtn) nextBtn.disabled = !hasChoice && current !== 4;
+      // Disable Back on first
+      const prevBtn = screens[current].querySelector('[data-prev]');
+      if (prevBtn) prevBtn.disabled = current === 0;
     }
 
-    function showResult() {
-      // Simple scoring logic
-      if (answers.includes("q1a") || answers.includes("q3a") || answers.includes("q5a")) {
-        leadershipResult.innerText = "Visionary Leader";
-      } else if (answers.includes("q1b") || answers.includes("q2b") || answers.includes("q4b")) {
-        leadershipResult.innerText = "Supportive Leader";
-      } else {
-        leadershipResult.innerText = "Strategic Leader";
-      }
-
-      resultElement.style.display = "block";
-      nextButton.style.display = "none";
-      emailSection.style.display = "block";
+    function allAnswered() {
+      return QUESTIONS.every(q => document.querySelector(`input[name="${q.name}"]:checked`));
     }
 
-    async function downloadCertificate() {
-      const email = document.getElementById("user-email").value;
-      if (!email || !email.includes("@")) {
-        alert("Please enter a valid email.");
-        return;
+    function score() {
+      const counts = { Visionary: 0, Supportive: 0, Strategic: 0 };
+      QUESTIONS.forEach(q => {
+        const val = (document.querySelector(`input[name="${q.name}"]:checked`)||{}).value;
+        const style = q.map[val];
+        if (style) counts[style]++;
+      });
+      return counts;
+    }
+
+    function pickStyle(counts) {
+      const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+      const [topStyle, topScore] = entries[0];
+      const second = entries[1];
+      if (second && topScore === second[1]) {
+        // Tie -> Hybrid label
+        return `${topStyle} / ${second[0]}`;
       }
+      return topStyle;
+    }
 
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+    function showResult(result, counts) {
+      // Hide quiz, show result screen
+      $('#quiz').style.display = 'none';
+      $('#result').classList.add('active');
 
-      // Add UC logo (replace with official logo image URL if needed)
-      const logoUrl = "https://upload.wikimedia.org/wikipedia/commons/5/5e/University_of_Canberra_logo.png";
+      const title = typeof result === 'string' ? result : 'Leadership Style';
+      $('#style-badge').textContent = 'Your leadership style';
+      $('#style-title').textContent = title;
 
+      const primary = title.split(' / ')[0];
+      $('#style-desc').textContent = STYLE_DESCRIPTIONS[primary] || '';
+
+      // Focus for screen readers
+      $('#style-title').setAttribute('tabindex','-1');
+      $('#style-title').focus();
+
+      // Wire result actions
+      $('#download-cert').addEventListener('click', generateCertificate);
+      $('#restart').addEventListener('click', () => location.reload());
+    }
+
+    async function generateCertificate(evt) {
+      evt.preventDefault();
+      const email = $('#user-email');
+      if (!email.value || !email.checkValidity()) { email.reportValidity(); return; }
+      const name = ($('#full-name').value || '').trim();
+      const style = $('#style-title').textContent;
+
+      const { jsPDF } = window.jspdf || {};
+      if (!jsPDF) { alert('PDF library failed to load. Please try again.'); return; }
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
+
+      // Try to load UC logo (host your own if required)
+      const logoUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5e/University_of_Canberra_logo.png';
       const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const logoPromise = new Promise(resolve => {
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+      });
       img.src = logoUrl;
+      const logo = await logoPromise;
 
-      img.onload = function () {
-        doc.addImage(img, "PNG", 10, 10, 40, 20);
-        doc.setFontSize(16);
-        doc.text("University of Canberra", 60, 20);
-        doc.setFontSize(14);
-        doc.text("Leadership Style Certificate", 60, 30);
-        doc.setFontSize(12);
-        doc.text(`Awarded to: ${email}`, 20, 50);
-        doc.text(`Leadership Style: ${leadershipResult.innerText}`, 20, 60);
+      // Dimensions
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
 
-        const today = new Date();
-        const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-        doc.text(`Date: ${dateStr}`, 20, 70);
+      // --- Fancy frame (double border) ---
+      doc.setDrawColor(180); doc.setLineWidth(2); doc.rect(28, 28, W-56, H-56);
+      doc.setDrawColor(220); doc.setLineWidth(1); doc.rect(44, 44, W-88, H-88);
 
-        doc.save(`UC_Leadership_Certificate.pdf`);
-        alert("Your certificate has been downloaded!");
-      };
+      // Watermark
+      doc.setTextColor(235);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(90);
+      doc.text('UC LEADERSHIP', W/2, H/2 + 20, { align: 'center', angle: -15 });
 
-      img.onerror = function () {
-        alert("Could not load UC logo. Try again later.");
-      };
+      // Header
+      if (logo) doc.addImage(logo, 'PNG', 60, 56, 120, 60);
+      doc.setTextColor(0);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(28);
+      doc.text('Leadership Style Certificate', W/2, 110, { align: 'center' });
+
+      // Recipient line
+      doc.setFontSize(16);
+      doc.setFont('helvetica','normal');
+      const awardedTo = name ? `Awarded to: ${name}  (${email.value})` : `Awarded to: ${email.value}`;
+      doc.text(awardedTo, W/2, 160, { align: 'center' });
+
+      // Style ribbon
+      const ribbonY = 210;
+      doc.setFillColor(33, 150, 243); // blue
+      doc.roundedRect(W/2 - 260, ribbonY - 28, 520, 56, 10, 10, 'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(22);
+      doc.setTextColor(255);
+      doc.text(`Leadership Style: ${style}`, W/2, ribbonY + 7, { align: 'center' });
+
+      // Description
+      doc.setTextColor(60);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(12);
+      const desc = $('#style-desc').textContent || '';
+      const wrapped = doc.splitTextToSize(desc, 640);
+      doc.text(wrapped, W/2, ribbonY + 52, { align: 'center', maxWidth: 640 });
+
+      // Seal (simple)
+      const cx = W - 140, cy = H - 130;
+      doc.setDrawColor(200); doc.setFillColor(255, 215, 0);
+      if (doc.circle) {
+        doc.circle(cx, cy, 46, 'FD');
+      } else {
+        doc.ellipse(cx, cy, 46, 46, 'FD');
+      }
+      doc.setTextColor(120);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(14);
+      doc.text('UC', cx, cy - 2, { align: 'center' });
+      doc.setFontSize(10);
+      doc.text('Leadership', cx, cy + 12, { align: 'center' });
+
+      // Footer details
+      const dateStr = new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
+      doc.setTextColor(0);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(12);
+      doc.text(`Date: ${dateStr}`, 76, H - 92);
+
+      // Signature lines
+      doc.setDrawColor(180);
+      doc.line(76, H - 120, 276, H - 120);
+      doc.text('Authorised by', 76, H - 80);
+
+      doc.line(320, H - 120, 520, H - 120);
+      doc.text('Participant signature', 320, H - 80);
+
+      // Disclaimer
+      doc.setTextColor(120);
+      doc.setFontSize(10);
+      doc.text('This certificate was generated in-browser and is not an official document of the University of Canberra.', W/2, H-44, { align: 'center' });
+
+      doc.save('Leadership_Certificate.pdf');
     }
+
+    // Initialise state on load
+    goto(0);
   </script>
 </body>
 </html>
