@@ -81,7 +81,7 @@
 
     .email-section { margin-top: 18px; text-align: center; }
     .grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
-    input[type="text"], input[type="email"] {
+    input[type="text"] {
       width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e4e6ea; font-size: 16px;
     }
 
@@ -166,7 +166,7 @@
         <fieldset>
           <legend id="q5-legend" tabindex="-1">5. What environment do you thrive in?</legend>
           <div role="group" aria-labelledby="q5-legend" class="options">
-            <label class="option"><input type="radio" name="q5" value="A"/> A) Fast‑paced, goal‑oriented</label>
+            <label class="option"><input type="radio" name="q5" value="A"/> A) Fast-paced, goal-oriented</label>
             <label class="option"><input type="radio" name="q5" value="B"/> B) Supportive & collaborative</label>
             <label class="option"><input type="radio" name="q5" value="C"/> C) Creative & flexible</label>
           </div>
@@ -189,27 +189,29 @@
       </div>
 
       <div class="email-section">
-        <div class="grid two">
+        <div class="grid">
           <div>
-            <label class="muted" for="full-name">Full name (optional)</label>
-            <input id="full-name" type="text" placeholder="Your name" autocomplete="name" />
-          </div>
-          <div>
-            <label class="muted" for="user-email">Email (for certificate)</label>
-            <input id="user-email" type="email" placeholder="name@example.com" required />
+            <label class="muted" for="full-name">Full name (for certificate)</label>
+            <input id="full-name" type="text" placeholder="Your name" autocomplete="name" required />
           </div>
         </div>
         <div class="actions" style="justify-content:center;margin-top:14px">
-          <button class="btn secondary" id="download-cert">Download certificate</button>
+          <button class="btn secondary" id="download-cert">Download certificate image (PNG)</button>
           <button class="btn ghost" id="restart">Restart</button>
         </div>
-        <p class="muted" style="margin-top:8px">Your details are used only to render the PDF in your browser and are not sent anywhere.</p>
+        <p class="muted" style="margin-top:8px">
+          Your name is used only to render the image locally in your browser. Nothing is sent or stored.
+        </p>
+
+        <div id="cert-preview" style="margin-top:12px; text-align:center; display:none;">
+          <img id="cert-img" alt="Certificate preview" style="max-width:100%; border:1px solid #eaecef; border-radius:8px;" />
+          <div class="actions" style="justify-content:center; margin-top:8px;">
+            <a id="open-in-tab" class="btn ghost" href="#" target="_blank" rel="noopener">Open image in new tab</a>
+          </div>
+        </div>
       </div>
     </section>
   </div>
-
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-YkG3ykrjR5wq8xwq5RHeu8Gk8r3x5v2t9vH9iJ4GoQmPjF3mV5mOo6KkJm9qXk8IQ0Mlz6e3n9kP2oH7c5p3YQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <script>
     // ----- Data model -----
@@ -224,7 +226,7 @@
     const STYLE_DESCRIPTIONS = {
       Visionary: 'You lead with energy and direction, setting bold goals and rallying others around a compelling future.',
       Supportive: 'You prioritise people, build trust, and create environments where teams feel safe to contribute and grow.',
-      Strategic: 'You think in systems, analyse trade‑offs, and make thoughtful decisions for long‑term outcomes.'
+      Strategic: 'You think in systems, analyse trade-offs, and make thoughtful decisions for long-term outcomes.'
     };
 
     // ----- State -----
@@ -320,112 +322,131 @@
       $('#style-title').focus();
 
       // Wire result actions
-      $('#download-cert').addEventListener('click', generateCertificate);
+      $('#download-cert').addEventListener('click', generateCertificateImage);
       $('#restart').addEventListener('click', () => location.reload());
     }
 
-    async function generateCertificate(evt) {
-      evt.preventDefault();
-      const email = $('#user-email');
-      if (!email.value || !email.checkValidity()) { email.reportValidity(); return; }
-      const name = ($('#full-name').value || '').trim();
-      const style = $('#style-title').textContent;
-
-      const { jsPDF } = window.jspdf || {};
-      if (!jsPDF) { alert('PDF library failed to load. Please try again.'); return; }
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
-
-      // Try to load UC logo (host your own if required)
-      const logoUrl = 'https://en.wikipedia.org/wiki/University_of_Canberra#/media/File:Logo_of_University_of_Canberra.png';
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      const logoPromise = new Promise(resolve => {
+    // --- Certificate image helpers & generator ---
+    async function loadImage(url) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
         img.onload = () => resolve(img);
         img.onerror = () => resolve(null);
+        img.src = url;
       });
-      img.src = logoUrl;
-      const logo = await logoPromise;
+    }
 
-      // Dimensions
-      const W = doc.internal.pageSize.getWidth();
-      const H = doc.internal.pageSize.getHeight();
+    function downloadBlob(filename, blob){
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    }
 
-      // --- Fancy frame (double border) ---
-      doc.setDrawColor(180); doc.setLineWidth(2); doc.rect(28, 28, W-56, H-56);
-      doc.setDrawColor(220); doc.setLineWidth(1); doc.rect(44, 44, W-88, H-88);
+    async function generateCertificateImage(evt){
+      evt.preventDefault();
+
+      const nameEl = document.querySelector('#full-name');
+      if (!nameEl.value.trim()) { nameEl.reportValidity?.(); return; }
+      const name = nameEl.value.trim();
+
+      const style = (document.querySelector('#style-title')||{}).textContent || 'Leadership Style';
+      const desc  = (document.querySelector('#style-desc')||{}).textContent  || '';
+
+      // Canvas size (works well on phones & desktop)
+      const W = 1600, H = 1000;
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,W,H);
+
+      // Double border
+      ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 4; ctx.strokeRect(24,24,W-48,H-48);
+      ctx.strokeStyle = '#e6e6e6'; ctx.lineWidth = 2; ctx.strokeRect(56,56,W-112,H-112);
 
       // Watermark
-      doc.setTextColor(235);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(90);
-      doc.text('UC LEADERSHIP', W/2, H/2 + 20, { align: 'center', angle: -15 });
+      ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(-15*Math.PI/180); ctx.globalAlpha = 0.06;
+      ctx.fillStyle = '#07428a'; ctx.font = 'bold 140px Helvetica, Arial, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('UC LEADERSHIP',0,40); ctx.restore();
 
-      // Header
-      if (logo) doc.addImage(logo, 'PNG', 60, 56, 120, 60);
-      doc.setTextColor(0);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(28);
-      doc.text('Leadership Style Certificate', W/2, 110, { align: 'center' });
-
-      // Recipient line
-      doc.setFontSize(16);
-      doc.setFont('helvetica','normal');
-      const awardedTo = name ? `Awarded to: ${name}  (${email.value})` : `Awarded to: ${email.value}`;
-      doc.text(awardedTo, W/2, 160, { align: 'center' });
-
-      // Style ribbon
-      const ribbonY = 210;
-      doc.setFillColor(33, 150, 243); // blue
-      doc.roundedRect(W/2 - 260, ribbonY - 28, 520, 56, 10, 10, 'F');
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(22);
-      doc.setTextColor(255);
-      doc.text(`Leadership Style: ${style}`, W/2, ribbonY + 7, { align: 'center' });
-
-      // Description
-      doc.setTextColor(60);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(12);
-      const desc = $('#style-desc').textContent || '';
-      const wrapped = doc.splitTextToSize(desc, 640);
-      doc.text(wrapped, W/2, ribbonY + 52, { align: 'center', maxWidth: 640 });
-
-      // Seal (simple)
-      const cx = W - 140, cy = H - 130;
-      doc.setDrawColor(200); doc.setFillColor(255, 215, 0);
-      if (doc.circle) {
-        doc.circle(cx, cy, 46, 'FD');
+      // UC logo — replace with 'uc-logo.png' in your folder to avoid CORS entirely
+      const LOGO_URL = 'https://upload.wikimedia.org/wikipedia/en/2/2b/Logo_of_University_of_Canberra.png';
+      const logo = await loadImage(LOGO_URL);
+      if (logo) {
+        const lw = 280, lh = (logo.height / logo.width) * lw;
+        ctx.drawImage(logo, 80, 76, lw, lh);
       } else {
-        doc.ellipse(cx, cy, 46, 46, 'FD');
+        // Fallback if logo fails to load
+        ctx.fillStyle = '#07428a';
+        ctx.fillRect(80, 76, 280, 60);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 26px Helvetica, Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('University of Canberra', 92, 116);
       }
-      doc.setTextColor(120);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(14);
-      doc.text('UC', cx, cy - 2, { align: 'center' });
-      doc.setFontSize(10);
-      doc.text('Leadership', cx, cy + 12, { align: 'center' });
 
-      // Footer details
+      // Title
+      ctx.fillStyle = '#000'; ctx.textAlign = 'center'; ctx.font = '700 52px Helvetica, Arial, sans-serif';
+      ctx.fillText('Leadership Style Certificate', W/2, 160);
+
+      // Awarded to + Name
+      ctx.font = '400 28px Helvetica, Arial, sans-serif'; ctx.fillStyle = '#333'; ctx.fillText('Awarded to', W/2, 230);
+      ctx.font = '700 64px Helvetica, Arial, sans-serif'; ctx.fillStyle = '#111'; ctx.fillText(name, W/2, 300);
+
+      // Ribbon
+      const ribbonY=380, ribbonW=920, ribbonH=80, rx=(W-ribbonW)/2, ry=ribbonY-ribbonH/2, r=20;
+      ctx.fillStyle = '#2196F3'; ctx.beginPath();
+      ctx.moveTo(rx+r, ry); ctx.lineTo(rx+ribbonW-r, ry);
+      ctx.quadraticCurveTo(rx+ribbonW, ry, rx+ribbonW, ry+r);
+      ctx.lineTo(rx+ribbonW, ry+ribbonH-r);
+      ctx.quadraticCurveTo(rx+ribbonW, ry+ribbonH, rx+ribbonW-r, ry+ribbonH);
+      ctx.lineTo(rx+r, ry+ribbonH);
+      ctx.quadraticCurveTo(rx, ry+ribbonH, rx, ry+ribbonH-r);
+      ctx.lineTo(rx, ry+r); ctx.quadraticCurveTo(rx, ry, rx+r, ry);
+      ctx.closePath(); ctx.fill();
+
+      ctx.fillStyle = '#fff'; ctx.font = '700 40px Helvetica, Arial, sans-serif';
+      ctx.fillText(`Leadership Style: ${style}`, W/2, ribbonY+14);
+
+      // Description (wrap)
+      ctx.fillStyle = '#444'; ctx.font = '400 24px Helvetica, Arial, sans-serif';
+      const maxWidth=1100, lineHeight=34, x=W/2; let y=ribbonY+90;
+      const wrap=(t)=>{ const words=t.split(/\s+/); let line='', lines=[]; for(const w of words){ const test=line?line+' '+w:w; if(ctx.measureText(test).width>maxWidth){ lines.push(line); line=w; } else { line=test; } } if(line) lines.push(line); return lines; };
+      for(const ln of wrap(desc)){ ctx.fillText(ln, x, y); y+=lineHeight; }
+
+      // Footer: date + signatures
+      ctx.fillStyle = '#000'; ctx.font = '400 22px Helvetica, Arial, sans-serif'; ctx.textAlign='left';
       const dateStr = new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
-      doc.setTextColor(0);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(12);
-      doc.text(`Date: ${dateStr}`, 76, H - 92);
+      ctx.fillText(`Date: ${dateStr}`, 96, H-120);
 
-      // Signature lines
-      doc.setDrawColor(180);
-      doc.line(76, H - 120, 276, H - 120);
-      doc.text('Authorised by', 76, H - 80);
+      ctx.strokeStyle='#b0b0b0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(96,H-150); ctx.lineTo(356,H-150); ctx.stroke();
+      ctx.fillStyle='#666'; ctx.fillText('Authorised by',96,H-100);
 
-      doc.line(320, H - 120, 520, H - 120);
-      doc.text('Participant signature', 320, H - 80);
+      ctx.strokeStyle='#b0b0b0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(420,H-150); ctx.lineTo(680,H-150); ctx.stroke();
+      ctx.fillStyle='#666'; ctx.fillText('Participant signature',420,H-100);
+
+      // Gold seal
+      const cx=W-160, cy=H-140, rad=60; ctx.fillStyle='#FFD700'; ctx.strokeStyle='#d4af37'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(cx,cy,rad,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='#7a6f00'; ctx.textAlign='center'; ctx.font='700 24px Helvetica, Arial, sans-serif'; ctx.fillText('UC', cx, cy-6);
+      ctx.font='700 16px Helvetica, Arial, sans-serif'; ctx.fillText('Leadership', cx, cy+18);
 
       // Disclaimer
-      doc.setTextColor(120);
-      doc.setFontSize(10);
-      doc.text('This certificate was generated in-browser and is not an official document of the University of Canberra.', W/2, H-44, { align: 'center' });
+      ctx.textAlign='center'; ctx.fillStyle='#777'; ctx.font='400 16px Helvetica, Arial, sans-serif';
+      ctx.fillText('This certificate image is generated locally in your browser and is not an official document of the University of Canberra.', W/2, H-40);
 
-      doc.save('Leadership_Certificate.pdf');
+      // Export PNG + show preview
+      canvas.toBlob((blob)=>{
+        if(!blob){ alert('Could not create image.'); return; }
+        downloadBlob('Leadership_Certificate.png', blob);
+        const url = URL.createObjectURL(blob);
+        const img = document.querySelector('#cert-img'); if(img) img.src = url;
+        const a = document.querySelector('#open-in-tab'); if(a) a.href = url;
+        const preview = document.querySelector('#cert-preview'); if(preview) preview.style.display='block';
+      }, 'image/png', 1);
     }
 
     // Initialise state on load
