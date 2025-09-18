@@ -390,10 +390,14 @@
       }
 
       // Faculty text in top-right corner
-      ctx.fillStyle = '#07428a';
-      ctx.font = 'bold 28px Helvetica, Arial, sans-serif';
+      ctx.fillStyle = '#0B7DDA';  // UC blue
+      ctx.font = 'italic 22px Helvetica, Arial, sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText('Faculty of Science & Technology', W - 80, 110);
+      
+      // Draw over two lines
+      ctx.fillText('Faculty of', W - 80, 106);
+      ctx.fillText('Science & Technology', W - 80, 132);
+
 
 
       // Title
