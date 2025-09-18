@@ -470,6 +470,24 @@
       ctx.fillText('Leadership', cx, cy + 18);
 
 
+      // Leadership style image
+      let styleKey = style.split(' / ')[0]; // get first if it's a tie
+      let imgPath = '';
+      if (styleKey === 'Visionary') imgPath = 'visionary.png';
+      else if (styleKey === 'Supportive') imgPath = 'supportive.png';
+      else if (styleKey === 'Strategic') imgPath = 'strategic.png';
+      
+      if (imgPath) {
+        const styleImg = await loadImage(imgPath);
+        if (styleImg) {
+          const iw = 180; // width
+          const ih = (styleImg.height / styleImg.width) * iw; // keep aspect ratio
+          ctx.drawImage(styleImg, W/2 - iw/2, 480, iw, ih); // top-right corner
+        }
+      }
+
+
+
       // Disclaimer
       ctx.textAlign='center'; ctx.fillStyle='#777'; ctx.font='400 16px Helvetica, Arial, sans-serif';
       ctx.fillText('This certificate image is generated locally in your browser and is not an official document of the University of Canberra.', W/2, H-40);
