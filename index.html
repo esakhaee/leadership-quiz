@@ -377,7 +377,7 @@
       // const LOGO_URL = 'https://upload.wikimedia.org/wikipedia/en/2/2b/Logo_of_University_of_Canberra.png';
       const logo = await loadImage(LOGO_URL);
       if (logo) {
-        const lw = 180; // reduce width from 280 → 180
+        const lw = 150; // reduce width from 280 → 180
         const lh = (logo.height / logo.width) * lw;
         ctx.drawImage(logo, 80, 76, lw, lh);
 
