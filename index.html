@@ -368,8 +368,8 @@
       ctx.strokeStyle = '#e6e6e6'; ctx.lineWidth = 2; ctx.strokeRect(56,56,W-112,H-112);
 
       // Watermark
-      ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(-15*Math.PI/180); ctx.globalAlpha = 0.06;
-      ctx.fillStyle = '#4498b8'; ctx.font = 'bold 140px Helvetica, Arial, sans-serif'; ctx.textAlign = 'center';
+      ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(-15*Math.PI/180); ctx.globalAlpha = 0.12;
+      ctx.fillStyle = '#0BA3D9'; ctx.font = 'bold 140px Helvetica, Arial, sans-serif'; ctx.textAlign = 'center';
       ctx.fillText('UC LEADERSHIP',0,40); ctx.restore();
 
       // UC logo — replace with 'uc-logo.png' in your folder to avoid CORS entirely
@@ -419,21 +419,56 @@
       for(const ln of wrap(desc)){ ctx.fillText(ln, x, y); y+=lineHeight; }
 
       // Footer: date + signatures
-      ctx.fillStyle = '#000'; ctx.font = '400 22px Helvetica, Arial, sans-serif'; ctx.textAlign='left';
+      ctx.fillStyle = '#000';
+      ctx.font = '400 22px Helvetica, Arial, sans-serif';
+      ctx.textAlign = 'left';
+      
       const dateStr = new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
-      ctx.fillText(`Date: ${dateStr}`, 96, H-120);
+      ctx.fillText(`Date: ${dateStr}`, 96, H - 120);
+      
+      // Left signature line + label (split over two lines to avoid overlap)
+      ctx.strokeStyle = '#b0b0b0';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(96, H - 150);
+      ctx.lineTo(356, H - 150);
+      ctx.stroke();
+      
+      ctx.fillStyle = '#666';
+      ctx.font = '400 20px Helvetica, Arial, sans-serif';  // slightly smaller so it fits
+      ctx.fillText('Authorised by', 96, H - 104);
+      ctx.fillText('Dr. Ehssan Sakhaee', 96, H - 80);
+      
+      // Right signature line + label
+      ctx.strokeStyle = '#b0b0b0';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(420, H - 150);
+      ctx.lineTo(680, H - 150);
+      ctx.stroke();
+      
+      ctx.fillStyle = '#666';
+      ctx.font = '400 22px Helvetica, Arial, sans-serif';
+      ctx.fillText('Participant signature', 420, H - 100);
 
-      ctx.strokeStyle='#b0b0b0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(96,H-150); ctx.lineTo(356,H-150); ctx.stroke();
-      ctx.fillStyle='#666'; ctx.fillText('Authorised by Dr. Ehssan Sakhaee',96,H-100);
+      // Blue seal
+      const cx = W - 160, cy = H - 140, rad = 60;
+      ctx.fillStyle = '#2196F3';   // blue fill
+      ctx.strokeStyle = '#0b7dda'; // darker blue border
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      
+      // White text inside seal
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.font = '700 24px Helvetica, Arial, sans-serif';
+      ctx.fillText('UC', cx, cy - 6);
+      ctx.font = '700 16px Helvetica, Arial, sans-serif';
+      ctx.fillText('Leadership', cx, cy + 18);
 
-      ctx.strokeStyle='#b0b0b0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(420,H-150); ctx.lineTo(680,H-150); ctx.stroke();
-      ctx.fillStyle='#666'; ctx.fillText('Participant signature',420,H-100);
-
-      // Gold seal
-      const cx=W-160, cy=H-140, rad=60; ctx.fillStyle='#FFD700'; ctx.strokeStyle='#d4af37'; ctx.lineWidth=3;
-      ctx.beginPath(); ctx.arc(cx,cy,rad,0,Math.PI*2); ctx.fill(); ctx.stroke();
-      ctx.fillStyle='#7a6f00'; ctx.textAlign='center'; ctx.font='700 24px Helvetica, Arial, sans-serif'; ctx.fillText('UC', cx, cy-6);
-      ctx.font='700 16px Helvetica, Arial, sans-serif'; ctx.fillText('Leadership', cx, cy+18);
 
       // Disclaimer
       ctx.textAlign='center'; ctx.fillStyle='#777'; ctx.font='400 16px Helvetica, Arial, sans-serif';
