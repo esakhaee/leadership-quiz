@@ -81,7 +81,7 @@
 
     .email-section { margin-top: 18px; text-align: center; }
     .grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
-    input[type="text"], input[type="file"] {
+    input[type="text"] {
       width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e4e6ea; font-size: 16px;
     }
 
@@ -193,22 +193,19 @@
           <div>
             <label class="muted" for="full-name">Full name (for certificate)</label>
             <input id="full-name" type="text" placeholder="Your name" autocomplete="name" required />
-
-            <label class="muted" for="photo" style="margin-top:12px; display:block;">
+            <label class="muted" for="photo" style="margin-top:12px;">
               Optional: Upload your photo to generate a cartoon portrait
             </label>
             <input id="photo" type="file" accept="image/*" />
             <p class="muted" id="photo-status" style="margin-top:6px;"></p>
           </div>
         </div>
-
         <div class="actions" style="justify-content:center;margin-top:14px">
           <button class="btn secondary" id="download-cert">Download certificate image (PNG)</button>
           <button class="btn ghost" id="restart">Restart</button>
         </div>
-
         <p class="muted" style="margin-top:8px">
-          Your name is used only to render the image locally in your browser. If you upload a photo, it is sent to your Cloudflare Worker to generate the cartoon portrait.
+          Your name is used only to render the image locally in your browser. Nothing is sent or stored.
         </p>
 
         <div id="cert-preview" style="margin-top:12px; text-align:center; display:none;">
@@ -222,9 +219,6 @@
   </div>
 
   <script>
-    // Cloudflare Worker endpoint (cartoonize)
-    const CARTOON_ENDPOINT = "https://red-bird-7216.ehssan-sakhaee.workers.dev";
-
     // ----- Data model -----
     const QUESTIONS = [
       { name: 'q1', legend: '1. What motivates you most?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
@@ -337,7 +331,7 @@
       $('#restart').addEventListener('click', () => location.reload());
     }
 
-    // --- Helpers ---
+    // --- Certificate image helpers & generator ---
     async function loadImage(url) {
       return new Promise(resolve => {
         const img = new Image();
@@ -355,33 +349,6 @@
       setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
     }
 
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result); // data:image/...;base64,...
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function getCartoonPortrait(imageDataUrl) {
-      const res = await fetch(CARTOON_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image_data_url: imageDataUrl })
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Cartoonize failed (${res.status}): ${text}`);
-      }
-
-      const data = await res.json();
-      if (!data.png_data_url) throw new Error("No png_data_url returned from Worker");
-      return data.png_data_url; // data:image/png;base64,...
-    }
-
-    // --- Certificate generator ---
     async function generateCertificateImage(evt){
       evt.preventDefault();
 
@@ -391,26 +358,6 @@
 
       const style = (document.querySelector('#style-title')||{}).textContent || 'Leadership Style';
       const desc  = (document.querySelector('#style-desc')||{}).textContent  || '';
-
-      // Optional cartoon portrait from uploaded photo
-      let portraitPngDataUrl = null;
-      const photoInput = document.getElementById("photo");
-      const statusEl = document.getElementById("photo-status");
-
-      if (photoInput?.files?.[0]) {
-        try {
-          if (statusEl) statusEl.textContent = "Creating your cartoon portrait…";
-          const dataUrl = await fileToBase64(photoInput.files[0]);
-          portraitPngDataUrl = await getCartoonPortrait(dataUrl);
-          if (statusEl) statusEl.textContent = "Cartoon portrait ready!";
-        } catch (e) {
-          console.error(e);
-          portraitPngDataUrl = null;
-          if (statusEl) statusEl.textContent = "Could not generate portrait — continuing without it.";
-        }
-      } else {
-        if (statusEl) statusEl.textContent = "";
-      }
 
       // Canvas size (works well on phones & desktop)
       const W = 1600, H = 1000;
@@ -425,13 +372,20 @@
       ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 4; ctx.strokeRect(24,24,W-48,H-48);
       ctx.strokeStyle = '#e6e6e6'; ctx.lineWidth = 2; ctx.strokeRect(56,56,W-112,H-112);
 
-      // UC logo — prefer local 'uc-logo.png' in same folder to avoid CORS
+      // Watermark
+      //ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(-15*Math.PI/180); ctx.globalAlpha = 0.12;
+      //ctx.fillStyle = '#0BA3D9'; ctx.font = 'bold 140px Helvetica, Arial, sans-serif'; ctx.textAlign = 'center';
+      //ctx.fillText('UC LEADERSHIP',0,40); ctx.restore();
+
+      // UC logo — replace with 'uc-logo.png' in your folder to avoid CORS entirely
       const LOGO_URL = 'uc-logo.png';
+      // const LOGO_URL = 'https://upload.wikimedia.org/wikipedia/en/2/2b/Logo_of_University_of_Canberra.png';
       const logo = await loadImage(LOGO_URL);
       if (logo) {
-        const lw = 150;
+        const lw = 150; // reduce width from 280 → 180
         const lh = (logo.height / logo.width) * lw;
         ctx.drawImage(logo, 80, 76, lw, lh);
+
       } else {
         // Fallback if logo fails to load
         ctx.fillStyle = '#07428a';
@@ -442,12 +396,16 @@
         ctx.fillText('University of Canberra', 92, 116);
       }
 
-      // Faculty text in top-right corner (two lines)
-      ctx.fillStyle = '#0B7DDA';
+      // Faculty text in top-right corner
+      ctx.fillStyle = '#0B7DDA';  // UC blue
       ctx.font = 'italic 22px Helvetica, Arial, sans-serif';
       ctx.textAlign = 'right';
+      
+      // Draw over two lines
       ctx.fillText('Faculty of', W - 80, 106);
       ctx.fillText('Science and Technology', W - 80, 132);
+
+
 
       // Title
       ctx.fillStyle = '#000'; ctx.textAlign = 'center'; ctx.font = '700 52px Helvetica, Arial, sans-serif';
@@ -478,37 +436,27 @@
       const wrap=(t)=>{ const words=t.split(/\s+/); let line='', lines=[]; for(const w of words){ const test=line?line+' '+w:w; if(ctx.measureText(test).width>maxWidth){ lines.push(line); line=w; } else { line=test; } } if(line) lines.push(line); return lines; };
       for(const ln of wrap(desc)){ ctx.fillText(ln, x, y); y+=lineHeight; }
 
-      // Draw optional cartoon portrait in center area (same size you used for giraffe)
-      if (portraitPngDataUrl) {
-        const portraitImg = await loadImage(portraitPngDataUrl);
-        if (portraitImg) {
-          const iw = 180;
-          const ih = (portraitImg.height / portraitImg.width) * iw;
-          ctx.drawImage(portraitImg, W/2 - iw/2, 480, iw, ih);
-        }
-      }
-
       // Footer: date + signatures
       ctx.fillStyle = '#000';
       ctx.font = '400 22px Helvetica, Arial, sans-serif';
       ctx.textAlign = 'left';
-
+      
       const dateStr = new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
       ctx.fillText(`Date: ${dateStr}`, 96, H - 120);
-
-      // Left signature line + label (split over two lines)
+      
+      // Left signature line + label (split over two lines to avoid overlap)
       ctx.strokeStyle = '#b0b0b0';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(96, H - 150);
       ctx.lineTo(356, H - 150);
       ctx.stroke();
-
+      
       ctx.fillStyle = '#666';
-      ctx.font = '400 20px Helvetica, Arial, sans-serif';
+      ctx.font = '400 20px Helvetica, Arial, sans-serif';  // slightly smaller so it fits
       ctx.fillText('Authorised by', 96, H - 104);
       ctx.fillText('Dr. Ehssan Sakhaee', 96, H - 80);
-
+      
       // Right signature line + label
       ctx.strokeStyle = '#b0b0b0';
       ctx.lineWidth = 2;
@@ -516,27 +464,47 @@
       ctx.moveTo(420, H - 150);
       ctx.lineTo(680, H - 150);
       ctx.stroke();
-
+      
       ctx.fillStyle = '#666';
       ctx.font = '400 22px Helvetica, Arial, sans-serif';
       ctx.fillText('Participant signature', 420, H - 100);
 
-      // Blue seal with white text
+      // Blue seal
       const cx = W - 160, cy = H - 140, rad = 60;
-      ctx.fillStyle = '#2196F3';
-      ctx.strokeStyle = '#0b7dda';
+      ctx.fillStyle = '#2196F3';   // blue fill
+      ctx.strokeStyle = '#0b7dda'; // darker blue border
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(cx, cy, rad, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-
+      
+      // White text inside seal
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
       ctx.font = '700 24px Helvetica, Arial, sans-serif';
       ctx.fillText('UC', cx, cy - 6);
       ctx.font = '700 16px Helvetica, Arial, sans-serif';
       ctx.fillText('Leadership', cx, cy + 18);
+
+
+      // Leadership style image
+      let styleKey = style.split(' / ')[0]; // get first if it's a tie
+      let imgPath = '';
+      if (styleKey === 'Visionary') imgPath = 'visionary.png';
+      else if (styleKey === 'Supportive') imgPath = 'supportive.png';
+      else if (styleKey === 'Strategic') imgPath = 'strategic.png';
+      
+      if (imgPath) {
+        const styleImg = await loadImage(imgPath);
+        if (styleImg) {
+          const iw = 180; // width
+          const ih = (styleImg.height / styleImg.width) * iw; // keep aspect ratio
+          ctx.drawImage(styleImg, W/2 - iw/2, 480, iw, ih); // top-right corner
+        }
+      }
+
+
 
       // Disclaimer
       ctx.textAlign='center'; ctx.fillStyle='#777'; ctx.font='400 16px Helvetica, Arial, sans-serif';
