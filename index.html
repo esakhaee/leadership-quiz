@@ -1,560 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Leadership Quiz</title>
-  <style>
-    :root {
-      --brand: #4CAF50;
-      --brand-2: #2196F3;
-      --bg: #f4f4f4;
-      --text: #333;
-      --card: #fff;
-      --muted: #666;
-    }
-    * { box-sizing: border-box; }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-    }
-    .container {
-      width: 92%;
-      max-width: 720px;
-      margin: 24px auto 40px;
-      padding: 24px;
-      background: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    }
-    h1 {
-      margin: 0 0 8px;
-      text-align: center;
-      color: var(--brand);
-      letter-spacing: 0.3px;
-    }
-    .sub { text-align: center; color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Leadership Quiz</title>
 
-    /* Progress */
-    .progress {
-      display: flex; align-items: center; gap: 12px;
-      margin: 10px 0 18px;
-    }
-    .progress meter {
-      width: 100%; height: 10px;
-    }
-    .screen { display: none; }
-    .screen.active { display: block; }
-
-    fieldset { border: 0; padding: 0; margin: 0; }
-    legend { font-weight: 600; margin-bottom: 10px; }
-
-    .options { display: grid; gap: 10px; margin: 8px 0 4px; }
-    .option {
-      display: flex; align-items: center; gap: 10px; padding: 12px;
-      border: 1px solid #e8e8e8; border-radius: 10px; cursor: pointer;
-    }
-    .option input { accent-color: var(--brand); }
-    .muted { color: var(--muted); font-size: 14px; }
-
-    .actions { display: flex; gap: 10px; justify-content: space-between; margin-top: 16px; }
-    .btn {
-      appearance: none; border: 0; border-radius: 10px; padding: 12px 16px; cursor: pointer; font-weight: 600;
-      background: var(--brand); color: #fff; transition: transform .03s ease-in-out, box-shadow .2s;
-      box-shadow: 0 2px 0 rgba(0,0,0,0.06);
-    }
-    .btn[disabled] { opacity: .6; cursor: not-allowed; }
-    .btn:active { transform: translateY(1px); }
-    .btn.secondary { background: var(--brand-2); }
-    .btn.ghost { background: #eef6ff; color: #07428a; }
-
-    .result {
-      text-align: center; padding: 8px 0 0;
-    }
-    .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #eef6ff; color: #07428a; font-weight: 700; }
-    .result-card {
-      margin: 12px auto; padding: 16px; border: 1px solid #eef0f2; border-radius: 12px; max-width: 520px; text-align: left;
-    }
-
-    .email-section { margin-top: 18px; text-align: center; }
-    .grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
-    input[type="text"], input[type="file"] {
-      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e4e6ea; font-size: 16px;
-    }
-
-    @media (min-width: 560px) {
-      .grid.two { grid-template-columns: 1fr 1fr; }
-    }
-  </style>
+<style>
+:root {
+  --brand: #4CAF50;
+  --brand-2: #2196F3;
+  --bg: #f4f4f4;
+  --text: #333;
+  --card: #fff;
+  --muted: #666;
+}
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin: 0;
+  background: var(--bg);
+}
+.container {
+  max-width: 720px;
+  margin: 24px auto;
+  padding: 24px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+h1 { text-align: center; color: var(--brand); }
+.progress { margin: 20px 0; }
+.screen { display: none; }
+.screen.active { display: block; }
+.btn {
+  background: var(--brand);
+  color: #fff;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn.secondary { background: var(--brand-2); }
+.muted { color: var(--muted); font-size: 14px; }
+input[type="text"], input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+</style>
 </head>
+
 <body>
-  <div class="container" id="app">
-    <h1>Leadership Quiz</h1>
-    <p class="sub" id="aria-status" aria-live="polite">Answer the questions to discover your dominant leadership style.</p>
+<div class="container">
+<h1>Leadership Quiz</h1>
 
-    <div class="progress" aria-hidden="false">
-      <meter id="progress" min="0" max="5" value="1"></meter>
-      <div class="muted"><span id="progress-text">1</span>/5</div>
-    </div>
+<form id="quiz">
+<section class="screen active" data-index="0">
+<p>1. What motivates you most?</p>
+<label><input type="radio" name="q1" value="Visionary"/> Achieving bold goals</label><br>
+<label><input type="radio" name="q1" value="Supportive"/> Helping others grow</label><br>
+<label><input type="radio" name="q1" value="Strategic"/> Solving complex challenges</label><br><br>
+<button type="button" class="btn" onclick="next()">Next</button>
+</section>
 
-    <!-- QUESTION SCREENS -->
-    <form id="quiz" novalidate>
-      <section class="screen active" data-index="0">
-        <fieldset>
-          <legend id="q1-legend" tabindex="-1">1. What motivates you most?</legend>
-          <div role="group" aria-labelledby="q1-legend" class="options">
-            <label class="option"><input type="radio" name="q1" value="A"/> A) Achieving personal goals</label>
-            <label class="option"><input type="radio" name="q1" value="B"/> B) Helping others achieve their goals</label>
-            <label class="option"><input type="radio" name="q1" value="C"/> C) Solving complex challenges</label>
-          </div>
-        </fieldset>
-        <div class="actions">
-          <button type="button" class="btn ghost" data-prev disabled>Back</button>
-          <button type="button" class="btn" data-next disabled>Next</button>
-        </div>
-      </section>
+<section class="screen" data-index="1">
+<p>2. How do you make decisions?</p>
+<label><input type="radio" name="q2" value="Visionary"/> Fast & intuitive</label><br>
+<label><input type="radio" name="q2" value="Supportive"/> Seek input</label><br>
+<label><input type="radio" name="q2" value="Strategic"/> Analyse deeply</label><br><br>
+<button type="button" class="btn secondary" onclick="submitQuiz()">See Result</button>
+</section>
+</form>
 
-      <section class="screen" data-index="1">
-        <fieldset>
-          <legend id="q2-legend" tabindex="-1">2. How do you make decisions?</legend>
-          <div role="group" aria-labelledby="q2-legend" class="options">
-            <label class="option"><input type="radio" name="q2" value="A"/> A) Quickly based on gut</label>
-            <label class="option"><input type="radio" name="q2" value="B"/> B) Gather input before deciding</label>
-            <label class="option"><input type="radio" name="q2" value="C"/> C) Analyse data first</label>
-          </div>
-        </fieldset>
-        <div class="actions">
-          <button type="button" class="btn ghost" data-prev>Back</button>
-          <button type="button" class="btn" data-next disabled>Next</button>
-        </div>
-      </section>
+<section id="result" class="screen">
+<h2 id="style-title"></h2>
+<p id="style-desc"></p>
 
-      <section class="screen" data-index="2">
-        <fieldset>
-          <legend id="q3-legend" tabindex="-1">3. How do you typically lead a team?</legend>
-          <div role="group" aria-labelledby="q3-legend" class="options">
-            <label class="option"><input type="radio" name="q3" value="A"/> A) By inspiring and motivating</label>
-            <label class="option"><input type="radio" name="q3" value="B"/> B) By setting clear goals & expectations</label>
-            <label class="option"><input type="radio" name="q3" value="C"/> C) By collaborating and seeking input</label>
-          </div>
-        </fieldset>
-        <div class="actions">
-          <button type="button" class="btn ghost" data-prev>Back</button>
-          <button type="button" class="btn" data-next disabled>Next</button>
-        </div>
-      </section>
+<label>Your name</label>
+<input id="full-name" type="text" required />
 
-      <section class="screen" data-index="3">
-        <fieldset>
-          <legend id="q4-legend" tabindex="-1">4. When faced with a problem, how do you react?</legend>
-          <div role="group" aria-labelledby="q4-legend" class="options">
-            <label class="option"><input type="radio" name="q4" value="A"/> A) Act quickly to resolve it</label>
-            <label class="option"><input type="radio" name="q4" value="B"/> B) Seek advice before deciding</label>
-            <label class="option"><input type="radio" name="q4" value="C"/> C) Analyse options & longer-term effects</label>
-          </div>
-        </fieldset>
-        <div class="actions">
-          <button type="button" class="btn ghost" data-prev>Back</button>
-          <button type="button" class="btn" data-next disabled>Next</button>
-        </div>
-      </section>
+<label style="margin-top:12px;">Optional: Upload your photo</label>
+<input id="photo" type="file" accept="image/*" />
+<p id="photo-status" class="muted"></p>
 
-      <section class="screen" data-index="4">
-        <fieldset>
-          <legend id="q5-legend" tabindex="-1">5. What environment do you thrive in?</legend>
-          <div role="group" aria-labelledby="q5-legend" class="options">
-            <label class="option"><input type="radio" name="q5" value="A"/> A) Fast-paced, goal-oriented</label>
-            <label class="option"><input type="radio" name="q5" value="B"/> B) Supportive & collaborative</label>
-            <label class="option"><input type="radio" name="q5" value="C"/> C) Creative & flexible</label>
-          </div>
-        </fieldset>
-        <div class="actions">
-          <button type="button" class="btn ghost" data-prev>Back</button>
-          <button type="submit" class="btn secondary" id="see-result" disabled>See your leadership style</button>
-        </div>
-      </section>
-    </form>
+<br>
+<button class="btn secondary" onclick="generateCertificate()">Download Certificate</button>
+</section>
 
-    <!-- RESULT SCREEN -->
-    <section id="result" class="screen" aria-live="polite">
-      <div class="result">
-        <div class="badge" id="style-badge">Leadership Style</div>
-        <div class="result-card">
-          <h2 id="style-title" style="margin:0 0 6px">&nbsp;</h2>
-          <p id="style-desc" class="muted" style="margin:0"></p>
-        </div>
-      </div>
+</div>
 
-      <div class="email-section">
-        <div class="grid">
-          <div>
-            <label class="muted" for="full-name">Full name (for certificate)</label>
-            <input id="full-name" type="text" placeholder="Your name" autocomplete="name" required />
+<script>
+const WORKER_URL = "https://red-bird-7216.ehssan-sakhaee.workers.dev/";
 
-            <label class="muted" for="photo" style="margin-top:12px; display:block;">
-              Optional: Upload your photo to generate a cartoon portrait
-            </label>
-            <input id="photo" type="file" accept="image/*" />
-            <p class="muted" id="photo-status" style="margin-top:6px;"></p>
-          </div>
-        </div>
+let current = 0;
 
-        <div class="actions" style="justify-content:center;margin-top:14px">
-          <button class="btn secondary" id="download-cert">Download certificate image (PNG)</button>
-          <button class="btn ghost" id="restart">Restart</button>
-        </div>
+function next() {
+  document.querySelector('.screen.active').classList.remove('active');
+  current++;
+  document.querySelector(`[data-index="${current}"]`).classList.add('active');
+}
 
-        <p class="muted" style="margin-top:8px">
-          Your name is used only to render the image locally in your browser. If you upload a photo, it is sent to your Cloudflare Worker to generate the cartoon portrait.
-        </p>
+function submitQuiz() {
+  const answers = [...document.querySelectorAll("input[type=radio]:checked")].map(r=>r.value);
+  const counts = { Visionary:0, Supportive:0, Strategic:0 };
+  answers.forEach(a=>counts[a]++);
+  const style = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  showResult(style);
+}
 
-        <div id="cert-preview" style="margin-top:12px; text-align:center; display:none;">
-          <img id="cert-img" alt="Certificate preview" style="max-width:100%; border:1px solid #eaecef; border-radius:8px;" />
-          <div class="actions" style="justify-content:center; margin-top:8px;">
-            <a id="open-in-tab" class="btn ghost" href="#" target="_blank" rel="noopener">Open image in new tab</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
+function showResult(style) {
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("result").classList.add("active");
+  document.getElementById("style-title").textContent = style;
+  document.getElementById("style-desc").textContent =
+    style==="Visionary" ? "You inspire bold direction." :
+    style==="Supportive" ? "You build trust and safety." :
+    "You think strategically for long-term impact.";
+}
 
-  <script>
-    // Cloudflare Worker endpoint (cartoonize)
-    const CARTOON_ENDPOINT = "https://red-bird-7216.ehssan-sakhaee.workers.dev";
+/* ---------- iPhone FIX: resize + convert to JPEG ---------- */
+async function fileToJpegDataUrl(file, maxDim = 1024, quality = 0.9) {
+  const dataUrl = await new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
 
-    // ----- Data model -----
-    const QUESTIONS = [
-      { name: 'q1', legend: '1. What motivates you most?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
-      { name: 'q2', legend: '2. How do you make decisions?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
-      { name: 'q3', legend: '3. How do you typically lead a team?', map: { A: 'Visionary', B: 'Strategic', C: 'Supportive' } },
-      { name: 'q4', legend: '4. When faced with a problem, how do you react?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
-      { name: 'q5', legend: '5. What environment do you thrive in?', map: { A: 'Visionary', B: 'Supportive', C: 'Strategic' } },
-    ];
+  const img = await new Promise((resolve,reject)=>{
+    const i=new Image();
+    i.onload=()=>resolve(i);
+    i.onerror=reject;
+    i.src=dataUrl;
+  });
 
-    const STYLE_DESCRIPTIONS = {
-      Visionary: 'You lead with energy and direction, setting bold goals and rallying others around a compelling future.',
-      Supportive: 'You prioritise people, build trust, and create environments where teams feel safe to contribute and grow.',
-      Strategic: 'You think in systems, analyse trade-offs, and make thoughtful decisions for long-term outcomes.'
+  let {width,height}=img;
+  const scale=Math.min(1,maxDim/Math.max(width,height));
+  width=Math.round(width*scale);
+  height=Math.round(height*scale);
+
+  const canvas=document.createElement("canvas");
+  canvas.width=width;
+  canvas.height=height;
+  const ctx=canvas.getContext("2d");
+  ctx.drawImage(img,0,0,width,height);
+
+  return canvas.toDataURL("image/jpeg",quality);
+}
+
+/* ---------- Generate Certificate ---------- */
+async function generateCertificate() {
+  const name=document.getElementById("full-name").value.trim();
+  if(!name) return alert("Please enter your name.");
+
+  const photoInput=document.getElementById("photo");
+  const statusEl=document.getElementById("photo-status");
+
+  let portraitDataUrl=null;
+
+  if(photoInput.files.length>0){
+    statusEl.textContent="Generating cartoon portrait...";
+    try{
+      const jpegDataUrl=await fileToJpegDataUrl(photoInput.files[0],1024,0.9);
+
+      const resp=await fetch(WORKER_URL,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({image_data_url:jpegDataUrl})
+      });
+
+      const data=await resp.json();
+      if(!resp.ok) throw new Error(data.error||"Portrait error");
+
+      portraitDataUrl=data.png_data_url;
+      statusEl.textContent="Portrait generated!";
+    }catch(e){
+      console.error(e);
+      statusEl.textContent="Could not generate portrait — continuing without it.";
+    }
+  }
+
+  createCertificateImage(name, portraitDataUrl);
+}
+
+function createCertificateImage(name, portraitDataUrl){
+  const W=1600, H=1000;
+  const canvas=document.createElement("canvas");
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext("2d");
+
+  ctx.fillStyle="#fff";
+  ctx.fillRect(0,0,W,H);
+
+  ctx.font="700 60px Arial";
+  ctx.textAlign="center";
+  ctx.fillText("Leadership Style Certificate",W/2,150);
+
+  ctx.font="700 48px Arial";
+  ctx.fillText(name,W/2,250);
+
+  if(portraitDataUrl){
+    const img=new Image();
+    img.onload=function(){
+      ctx.drawImage(img,W/2-100,350,200,200);
+      finish();
     };
+    img.src=portraitDataUrl;
+  }else{
+    finish();
+  }
 
-    // ----- State -----
-    let current = 0; // screen index in [0..4]
-
-    const $ = (sel, ctx=document) => ctx.querySelector(sel);
-    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
-
-    const screens = $$('#quiz .screen');
-    const progress = $('#progress');
-    const progressText = $('#progress-text');
-    const ariaStatus = $('#aria-status');
-
-    // Enable next buttons when an option is picked, and the submit button on last screen
-    $$('#quiz input[type="radio"]').forEach(input => {
-      input.addEventListener('change', () => {
-        const section = input.closest('.screen');
-        const nextBtn = section.querySelector('[data-next]') || $('#see-result');
-        if (nextBtn) nextBtn.disabled = false;
-      });
+  function finish(){
+    canvas.toBlob(blob=>{
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download="Leadership_Certificate.png";
+      a.click();
     });
+  }
+}
+</script>
 
-    // Navigation handlers
-    $$('#quiz [data-next]').forEach(btn => btn.addEventListener('click', () => goto(current + 1)));
-    $$('#quiz [data-prev]').forEach(btn => btn.addEventListener('click', () => goto(current - 1)));
-
-    $('#quiz').addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!allAnswered()) { alert('Please answer all questions.'); return; }
-      const tally = score();
-      const result = pickStyle(tally);
-      showResult(result, tally);
-    });
-
-    function goto(index) {
-      if (index < 0 || index > 4) return;
-      screens[current].classList.remove('active');
-      current = index;
-      screens[current].classList.add('active');
-      progress.value = current + 1;
-      progressText.textContent = String(current + 1);
-      const legend = screens[current].querySelector('legend');
-      if (legend) legend.focus();
-      ariaStatus.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
-      // Disable Next if no selection yet
-      const hasChoice = screens[current].querySelector('input[type="radio"]:checked');
-      const nextBtn = screens[current].querySelector('[data-next]') || $('#see-result');
-      if (nextBtn) nextBtn.disabled = !hasChoice && current !== 4;
-      // Disable Back on first
-      const prevBtn = screens[current].querySelector('[data-prev]');
-      if (prevBtn) prevBtn.disabled = current === 0;
-    }
-
-    function allAnswered() {
-      return QUESTIONS.every(q => document.querySelector(`input[name="${q.name}"]:checked`));
-    }
-
-    function score() {
-      const counts = { Visionary: 0, Supportive: 0, Strategic: 0 };
-      QUESTIONS.forEach(q => {
-        const val = (document.querySelector(`input[name="${q.name}"]:checked`)||{}).value;
-        const style = q.map[val];
-        if (style) counts[style]++;
-      });
-      return counts;
-    }
-
-    function pickStyle(counts) {
-      const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]);
-      const [topStyle, topScore] = entries[0];
-      const second = entries[1];
-      if (second && topScore === second[1]) {
-        // Tie -> Hybrid label
-        return `${topStyle} / ${second[0]}`;
-      }
-      return topStyle;
-    }
-
-    function showResult(result, counts) {
-      // Hide quiz, show result screen
-      $('#quiz').style.display = 'none';
-      $('#result').classList.add('active');
-
-      const title = typeof result === 'string' ? result : 'Leadership Style';
-      $('#style-badge').textContent = 'Your leadership style';
-      $('#style-title').textContent = title;
-
-      const primary = title.split(' / ')[0];
-      $('#style-desc').textContent = STYLE_DESCRIPTIONS[primary] || '';
-
-      // Focus for screen readers
-      $('#style-title').setAttribute('tabindex','-1');
-      $('#style-title').focus();
-
-      // Wire result actions
-      $('#download-cert').addEventListener('click', generateCertificateImage);
-      $('#restart').addEventListener('click', () => location.reload());
-    }
-
-    // --- Helpers ---
-    async function loadImage(url) {
-      return new Promise(resolve => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(null);
-        img.src = url;
-      });
-    }
-
-    function downloadBlob(filename, blob){
-      const a = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      a.href = url; a.download = filename; document.body.appendChild(a); a.click();
-      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
-    }
-
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result); // data:image/...;base64,...
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function getCartoonPortrait(imageDataUrl) {
-      const res = await fetch(CARTOON_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image_data_url: imageDataUrl })
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Cartoonize failed (${res.status}): ${text}`);
-      }
-
-      const data = await res.json();
-      if (!data.png_data_url) throw new Error("No png_data_url returned from Worker");
-      return data.png_data_url; // data:image/png;base64,...
-    }
-
-    // --- Certificate generator ---
-    async function generateCertificateImage(evt){
-      evt.preventDefault();
-
-      const nameEl = document.querySelector('#full-name');
-      if (!nameEl.value.trim()) { nameEl.reportValidity?.(); return; }
-      const name = nameEl.value.trim();
-
-      const style = (document.querySelector('#style-title')||{}).textContent || 'Leadership Style';
-      const desc  = (document.querySelector('#style-desc')||{}).textContent  || '';
-
-      // Optional cartoon portrait from uploaded photo
-      let portraitPngDataUrl = null;
-      const photoInput = document.getElementById("photo");
-      const statusEl = document.getElementById("photo-status");
-
-      if (photoInput?.files?.[0]) {
-        try {
-          if (statusEl) statusEl.textContent = "Creating your cartoon portrait…";
-          const dataUrl = await fileToBase64(photoInput.files[0]);
-          portraitPngDataUrl = await getCartoonPortrait(dataUrl);
-          if (statusEl) statusEl.textContent = "Cartoon portrait ready!";
-        } catch (e) {
-          console.error(e);
-          portraitPngDataUrl = null;
-          if (statusEl) statusEl.textContent = "Could not generate portrait — continuing without it.";
-        }
-      } else {
-        if (statusEl) statusEl.textContent = "";
-      }
-
-      // Canvas size (works well on phones & desktop)
-      const W = 1600, H = 1000;
-      const canvas = document.createElement('canvas');
-      canvas.width = W; canvas.height = H;
-      const ctx = canvas.getContext('2d');
-
-      // Background
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,W,H);
-
-      // Double border
-      ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 4; ctx.strokeRect(24,24,W-48,H-48);
-      ctx.strokeStyle = '#e6e6e6'; ctx.lineWidth = 2; ctx.strokeRect(56,56,W-112,H-112);
-
-      // UC logo — prefer local 'uc-logo.png' in same folder to avoid CORS
-      const LOGO_URL = 'uc-logo.png';
-      const logo = await loadImage(LOGO_URL);
-      if (logo) {
-        const lw = 150;
-        const lh = (logo.height / logo.width) * lw;
-        ctx.drawImage(logo, 80, 76, lw, lh);
-      } else {
-        // Fallback if logo fails to load
-        ctx.fillStyle = '#07428a';
-        ctx.fillRect(80, 76, 280, 60);
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 26px Helvetica, Arial, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText('University of Canberra', 92, 116);
-      }
-
-      // Faculty text in top-right corner (two lines)
-      ctx.fillStyle = '#0B7DDA';
-      ctx.font = 'italic 22px Helvetica, Arial, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText('Faculty of', W - 80, 106);
-      ctx.fillText('Science and Technology', W - 80, 132);
-
-      // Title
-      ctx.fillStyle = '#000'; ctx.textAlign = 'center'; ctx.font = '700 52px Helvetica, Arial, sans-serif';
-      ctx.fillText('Leadership Style Certificate', W/2, 160);
-
-      // Awarded to + Name
-      ctx.font = '400 28px Helvetica, Arial, sans-serif'; ctx.fillStyle = '#333'; ctx.fillText('Awarded to', W/2, 230);
-      ctx.font = '700 64px Helvetica, Arial, sans-serif'; ctx.fillStyle = '#111'; ctx.fillText(name, W/2, 300);
-
-      // Ribbon
-      const ribbonY=380, ribbonW=920, ribbonH=80, rx=(W-ribbonW)/2, ry=ribbonY-ribbonH/2, r=20;
-      ctx.fillStyle = '#2196F3'; ctx.beginPath();
-      ctx.moveTo(rx+r, ry); ctx.lineTo(rx+ribbonW-r, ry);
-      ctx.quadraticCurveTo(rx+ribbonW, ry, rx+ribbonW, ry+r);
-      ctx.lineTo(rx+ribbonW, ry+ribbonH-r);
-      ctx.quadraticCurveTo(rx+ribbonW, ry+ribbonH, rx+ribbonW-r, ry+ribbonH);
-      ctx.lineTo(rx+r, ry+ribbonH);
-      ctx.quadraticCurveTo(rx, ry+ribbonH, rx, ry+ribbonH-r);
-      ctx.lineTo(rx, ry+r); ctx.quadraticCurveTo(rx, ry, rx+r, ry);
-      ctx.closePath(); ctx.fill();
-
-      ctx.fillStyle = '#fff'; ctx.font = '700 40px Helvetica, Arial, sans-serif';
-      ctx.fillText(`Leadership Style: ${style}`, W/2, ribbonY+14);
-
-      // Description (wrap)
-      ctx.fillStyle = '#444'; ctx.font = '400 24px Helvetica, Arial, sans-serif';
-      const maxWidth=1100, lineHeight=34, x=W/2; let y=ribbonY+90;
-      const wrap=(t)=>{ const words=t.split(/\s+/); let line='', lines=[]; for(const w of words){ const test=line?line+' '+w:w; if(ctx.measureText(test).width>maxWidth){ lines.push(line); line=w; } else { line=test; } } if(line) lines.push(line); return lines; };
-      for(const ln of wrap(desc)){ ctx.fillText(ln, x, y); y+=lineHeight; }
-
-      // Draw optional cartoon portrait in center area (same size you used for giraffe)
-      if (portraitPngDataUrl) {
-        const portraitImg = await loadImage(portraitPngDataUrl);
-        if (portraitImg) {
-          const iw = 180;
-          const ih = (portraitImg.height / portraitImg.width) * iw;
-          ctx.drawImage(portraitImg, W/2 - iw/2, 480, iw, ih);
-        }
-      }
-
-      // Footer: date + signatures
-      ctx.fillStyle = '#000';
-      ctx.font = '400 22px Helvetica, Arial, sans-serif';
-      ctx.textAlign = 'left';
-
-      const dateStr = new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
-      ctx.fillText(`Date: ${dateStr}`, 96, H - 120);
-
-      // Left signature line + label (split over two lines)
-      ctx.strokeStyle = '#b0b0b0';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(96, H - 150);
-      ctx.lineTo(356, H - 150);
-      ctx.stroke();
-
-      ctx.fillStyle = '#666';
-      ctx.font = '400 20px Helvetica, Arial, sans-serif';
-      ctx.fillText('Authorised by', 96, H - 104);
-      ctx.fillText('Dr. Ehssan Sakhaee', 96, H - 80);
-
-      // Right signature line + label
-      ctx.strokeStyle = '#b0b0b0';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(420, H - 150);
-      ctx.lineTo(680, H - 150);
-      ctx.stroke();
-
-      ctx.fillStyle = '#666';
-      ctx.font = '400 22px Helvetica, Arial, sans-serif';
-      ctx.fillText('Participant signature', 420, H - 100);
-
-      // Blue seal with white text
-      const cx = W - 160, cy = H - 140, rad = 60;
-      ctx.fillStyle = '#2196F3';
-      ctx.strokeStyle = '#0b7dda';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'center';
-      ctx.font = '700 24px Helvetica, Arial, sans-serif';
-      ctx.fillText('UC', cx, cy - 6);
-      ctx.font = '700 16px Helvetica, Arial, sans-serif';
-      ctx.fillText('Leadership', cx, cy + 18);
-
-      // Disclaimer
-      ctx.textAlign='center'; ctx.fillStyle='#777'; ctx.font='400 16px Helvetica, Arial, sans-serif';
-      ctx.fillText('This certificate image is generated locally in your browser and is not an official document of the University of Canberra.', W/2, H-40);
-
-      // Export PNG + show preview
-      canvas.toBlob((blob)=>{
-        if(!blob){ alert('Could not create image.'); return; }
-        downloadBlob('Leadership_Certificate.png', blob);
-        const url = URL.createObjectURL(blob);
-        const img = document.querySelector('#cert-img'); if(img) img.src = url;
-        const a = document.querySelector('#open-in-tab'); if(a) a.href = url;
-        const preview = document.querySelector('#cert-preview'); if(preview) preview.style.display='block';
-      }, 'image/png', 1);
-    }
-
-    // Initialise state on load
-    goto(0);
-  </script>
 </body>
 </html>
