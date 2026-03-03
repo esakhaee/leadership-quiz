@@ -546,26 +546,29 @@
       ctx.fillText('This certificate image is generated locally in your browser and is not an official document of the University of Canberra.', W/2, H-40);
 
       // Export PNG + show preview
-canvas.toBlob((blob) => {
-  if (!blob) {
-    try {
-      const dataUrl = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = 'Leadership_Certificate.png';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      return;
-    } catch (e) {
-      console.error('Canvas export failed:', e);
-      alert('Could not create image.');
-      return;
-    }
-  }
+ // Export PNG + show preview
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          try {
+            const dataUrl = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = 'Leadership_Certificate.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            return;
+          } catch (e) {
+            console.error('Canvas export failed:', e);
+            alert('Could not create image.');
+            return;
+          }
+        }
 
-  downloadBlob('Leadership_Certificate.png', blob);
-}, 'image/png', 1);
+        downloadBlob('Leadership_Certificate.png', blob);
+      }, 'image/png', 1);
+    } // <-- closes generateCertificateImage
+
 
     // Initialise state on load
     goto(0);
