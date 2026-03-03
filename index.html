@@ -339,17 +339,14 @@
 
     // --- Helpers ---
     async function loadImage(url) {
-  return new Promise(resolve => {
-    const img = new Image();
-
-    const isRemote = /^https?:\/\//i.test(url);
-    if (isRemote) img.crossOrigin = 'anonymous';
-
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
-}
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    }
 
     function downloadBlob(filename, blob){
       const a = document.createElement('a');
@@ -429,7 +426,7 @@
       ctx.strokeStyle = '#e6e6e6'; ctx.lineWidth = 2; ctx.strokeRect(56,56,W-112,H-112);
 
       // UC logo — prefer local 'uc-logo.png' in same folder to avoid CORS
-      const LOGO_URL = './uc-logo.png';
+      const LOGO_URL = 'uc-logo.png';
       const logo = await loadImage(LOGO_URL);
       if (logo) {
         const lw = 150;
@@ -546,29 +543,15 @@
       ctx.fillText('This certificate image is generated locally in your browser and is not an official document of the University of Canberra.', W/2, H-40);
 
       // Export PNG + show preview
- // Export PNG + show preview
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          try {
-            const dataUrl = canvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = dataUrl;
-            a.download = 'Leadership_Certificate.png';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            return;
-          } catch (e) {
-            console.error('Canvas export failed:', e);
-            alert('Could not create image.');
-            return;
-          }
-        }
-
+      canvas.toBlob((blob)=>{
+        if(!blob){ alert('Could not create image.'); return; }
         downloadBlob('Leadership_Certificate.png', blob);
+        const url = URL.createObjectURL(blob);
+        const img = document.querySelector('#cert-img'); if(img) img.src = url;
+        const a = document.querySelector('#open-in-tab'); if(a) a.href = url;
+        const preview = document.querySelector('#cert-preview'); if(preview) preview.style.display='block';
       }, 'image/png', 1);
-    } // <-- closes generateCertificateImage
-
+    }
 
     // Initialise state on load
     goto(0);
